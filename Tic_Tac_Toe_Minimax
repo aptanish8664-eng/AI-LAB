@@ -1,0 +1,82 @@
+import math
+
+def print_board(b):
+    # Displays the current 3x3 board layout
+    print(f"\n {b[0]} | {b[1]} | {b[2]} \n-----------\n {b[3]} | {b[4]} | {b[5]} \n-----------\n {b[6]} | {b[7]} | {b[8]} \n")
+
+def is_winner(b, p):
+    # Returns True if player 'p' has 3 in any row, column, or diagonal
+    win_lines = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]]
+    return any(all(b[i] == p for i in line) for line in win_lines)
+
+def minimax(b, is_max):
+    # Core AI logic: O wants to maximize (+1), X wants to minimize (-1)
+    if is_winner(b, 'O'): return 1
+    if is_winner(b, 'X'): return -1
+    if " " not in b: return 0
+
+    scores = []
+    for i in range(9):
+        if b[i] == " ":
+            b[i] = 'O' if is_max else 'X'
+            scores.append(minimax(b, not is_max))
+            b[i] = " "  # Undo simulation move
+            
+    return max(scores) if is_max else min(scores)
+
+def main():
+    board = [" "] * 9
+    print("TIC-TAC-TOE\nYou are X\nComputer is O")
+
+    while True:
+        print_board(board)
+        
+        # Human Turn with Validation Loop
+        while True:
+            try:
+                move = int(input("Enter position (1-9): "))
+                if 1 <= move <= 9 and board[move - 1] == " ":
+                    break
+                print("Invalid move. Try again.")
+            except ValueError:
+                print("Invalid move. Try again.")
+
+        board[move - 1] = 'X'
+        
+        # Human Evaluation Checks
+        if is_winner(board, 'X'): 
+            print_board(board)
+            print("You win!")
+            break
+        if " " not in board: 
+            print_board(board)
+            print("Draw!")
+            break
+
+        # Computer Turn (AI Selection)
+        best_score = -math.inf
+        best_move = -1
+        for i in range(9):
+            if board[i] == " ":
+                board[i] = 'O'
+                score = minimax(board, False)
+                board[i] = " "
+                if score > best_score:
+                    best_score = score
+                    best_move = i
+
+        print(f"Computer chose position: {best_move + 1}")
+        board[best_move] = 'O'
+        
+        # Computer Evaluation Checks
+        if is_winner(board, 'O'): 
+            print_board(board)
+            print("Computer wins!")
+            break
+        if " " not in board: 
+            print_board(board)
+            print("Draw!")
+            break
+
+if __name__ == "__main__":
+    main()
